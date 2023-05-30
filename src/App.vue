@@ -1,4 +1,5 @@
 <script>
+import { v4 as uuidv4 } from 'uuid'
 import PlusIcon from './assets/icons/PlusIcon.vue'
 import TrashIcon from './assets/icons/TrashIcon.vue'
 import CloseIcon from './assets/icons/CloseIcon.vue'
@@ -15,17 +16,22 @@ export default {
     return {
       ticker: 'default',
       tickers: [
-        { title: 'WTF - USD', value: 1.11 },
-        { title: 'VUE - RUB', value: 80000.0 },
-        { title: 'BTC - USD', value: 99999.99 },
-        { title: 'DOGE - USD', value: 0.0014 }
+        { id: '1', title: 'WTF', value: 1.11 },
+        { id: '2', title: 'VUE', value: 80000.0 },
+        { id: '3', title: 'BTC', value: 99999.99 },
+        { id: '4', title: 'DOGE', value: 0.0014 }
       ]
     }
   },
 
   methods: {
     add() {
-      alert(this.ticker)
+      this.tickers.push({ id: uuidv4(), title: this.ticker, value: 1.11 })
+      this.ticker = ''
+    },
+
+    deleteHandler(tickerToRemove) {
+      this.tickers = this.tickers.filter((t) => t.id !== tickerToRemove.id)
     }
   }
 }
@@ -117,10 +123,11 @@ export default {
             class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
-              <dt class="text-sm font-medium text-gray-500 truncate">{{ t.title }}</dt>
+              <dt class="text-sm font-medium text-gray-500 truncate">{{ t.title }} - USD</dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ t.value }}</dd>
             </div>
             <button
+              @click="deleteHandler(t)"
               class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all"
             >
               <TrashIcon />
