@@ -116,10 +116,12 @@ export default {
         </button>
       </section>
 
-      <hr class="w-full border-t border-gray-600 my-4" />
-      <ul class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <li v-for="t in tickers" :key="t.title">
+      <template v-if="tickers.length > 0">
+        <hr class="w-full border-t border-gray-600 my-4" />
+        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
+            v-for="t in tickers"
+            :key="t.title"
             class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
@@ -134,9 +136,9 @@ export default {
               Удалить
             </button>
           </div>
-        </li>
-      </ul>
-      <hr class="w-full border-t border-gray-600 my-4" />
+        </dl>
+        <hr class="w-full border-t border-gray-600 my-4" />
+      </template>
       <section class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">VUE - USD</h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
