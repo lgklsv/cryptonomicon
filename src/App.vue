@@ -20,7 +20,8 @@ export default {
         { id: '2', title: 'VUE', value: 80000.0 },
         { id: '3', title: 'BTC', value: 99999.99 },
         { id: '4', title: 'DOGE', value: 0.0014 }
-      ]
+      ],
+      selected: null
     }
   },
 
@@ -122,6 +123,7 @@ export default {
           <div
             v-for="t in tickers"
             :key="t.title"
+            @click="selected = t"
             class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
@@ -139,7 +141,7 @@ export default {
         </dl>
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
-      <section class="relative">
+      <section v-if="selected" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">VUE - USD</h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div class="bg-purple-800 border w-10 h-24"></div>
@@ -147,7 +149,7 @@ export default {
           <div class="bg-purple-800 border w-10 h-48"></div>
           <div class="bg-purple-800 border w-10 h-16"></div>
         </div>
-        <button type="button" class="absolute top-0 right-0">
+        <button @click="selected = null" type="button" class="absolute top-0 right-0">
           <CloseIcon />
         </button>
       </section>
