@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid'
 import PlusIcon from './assets/icons/PlusIcon.vue'
 import TrashIcon from './assets/icons/TrashIcon.vue'
 import CloseIcon from './assets/icons/CloseIcon.vue'
+const API = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY
+
 export default {
   name: 'App',
 
@@ -27,7 +29,7 @@ export default {
 
       setInterval(async () => {
         const result = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.title}&tsyms=USD&api_key=98e5704fc3c441f4e0ff5749a13a275758a8aec21c525b9ab49a8a7c58c64264`
+          `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.title}&tsyms=USD&api_key=${API}`
         )
         const data = await result.json()
         const curTicker = this.tickers.find((t) => t.id === newTicker.id)
