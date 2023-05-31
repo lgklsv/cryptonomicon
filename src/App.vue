@@ -19,22 +19,28 @@ export default {
       ticker: '',
       tickers: [],
       selected: null,
+      graph: [],
     };
   },
 
   methods: {
     add() {
-      const newTicker = { id: uuidv4(), title: this.ticker, value: '-' };
-      this.tickers.push(newTicker);
+      const currentTicker = { id: uuidv4(), title: this.ticker, value: '-' };
+      this.tickers.push(currentTicker);
 
       setInterval(async () => {
         const result = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.title}&tsyms=USD&api_key=${API}`
+          `https://min-api.cryptocompare.com/data/price?fsym=${currentTicker.title}&tsyms=USD&api_key=${API}`
         );
         const data = await result.json();
-        const curTicker = this.tickers.find((t) => t.id === newTicker.id);
+
+        const curTicker = this.tickers.find((t) => t.id === currentTicker.id);
         curTicker.value =
           data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+
+        if (this.selected.id === currentTicker.id) {
+          this.graph.push(data.USD);
+        }
       }, 3000);
       this.ticker = '';
     },
@@ -163,10 +169,11 @@ export default {
           {{ selected.title }} - USD
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
-          <div class="bg-purple-800 border w-10 h-24"></div>
-          <div class="bg-purple-800 border w-10 h-32"></div>
-          <div class="bg-purple-800 border w-10 h-48"></div>
-          <div class="bg-purple-800 border w-10 h-16"></div>
+          <div
+            v-for="(bar, idx) in graph"
+            :key="idx"
+            class="bg-purple-800 border w-10 h-24"
+          />
         </div>
         <button
           @click="selected = null"
