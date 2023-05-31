@@ -1,9 +1,9 @@
 <script>
-import { v4 as uuidv4 } from 'uuid'
-import PlusIcon from './assets/icons/PlusIcon.vue'
-import TrashIcon from './assets/icons/TrashIcon.vue'
-import CloseIcon from './assets/icons/CloseIcon.vue'
-const API = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY
+import { v4 as uuidv4 } from 'uuid';
+import PlusIcon from './assets/icons/PlusIcon.vue';
+import TrashIcon from './assets/icons/TrashIcon.vue';
+import CloseIcon from './assets/icons/CloseIcon.vue';
+const API = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY;
 
 export default {
   name: 'App',
@@ -11,42 +11,45 @@ export default {
   components: {
     PlusIcon,
     TrashIcon,
-    CloseIcon
+    CloseIcon,
   },
 
   data() {
     return {
       ticker: '',
       tickers: [],
-      selected: null
-    }
+      selected: null,
+    };
   },
 
   methods: {
     add() {
-      const newTicker = { id: uuidv4(), title: this.ticker, value: '-' }
-      this.tickers.push(newTicker)
+      const newTicker = { id: uuidv4(), title: this.ticker, value: '-' };
+      this.tickers.push(newTicker);
 
       setInterval(async () => {
         const result = await fetch(
           `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.title}&tsyms=USD&api_key=${API}`
-        )
-        const data = await result.json()
-        const curTicker = this.tickers.find((t) => t.id === newTicker.id)
-        curTicker.value = data.USD
-      }, 3000)
-      this.ticker = ''
+        );
+        const data = await result.json();
+        const curTicker = this.tickers.find((t) => t.id === newTicker.id);
+        curTicker.value =
+          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+      }, 3000);
+      this.ticker = '';
     },
 
     deleteHandler(tickerToRemove) {
-      this.tickers = this.tickers.filter((t) => t.id !== tickerToRemove.id)
-    }
-  }
-}
+      this.tickers = this.tickers.filter((t) => t.id !== tickerToRemove.id);
+    },
+  },
+};
 </script>
 
 <template>
-  <div class="container mx-auto min-h-screen flex flex-col items-center bg-gray-100 p-4">
+  <div
+    class="container mx-auto min-h-screen flex flex-col items-center bg-gray-100 p-4"
+  >
     <!-- <div
       class="fixed w-100 h-100 opacity-80 bg-purple-800 inset-0 z-50 flex items-center justify-center"
     >
@@ -75,9 +78,9 @@ export default {
       <section>
         <div class="flex">
           <div class="max-w-xs">
-            <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Тикер {{ ticker }}</label
-            >
+            <label for="wallet" class="block text-sm font-medium text-gray-700">
+              Тикер {{ ticker }}
+            </label>
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 v-model="ticker"
@@ -132,13 +135,17 @@ export default {
             :key="t.title"
             @click="selected = t"
             :class="{
-              'border-purple-800': selected === t
+              'border-purple-800': selected === t,
             }"
             class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
-              <dt class="text-sm font-medium text-gray-500 truncate">{{ t.title }} - USD</dt>
-              <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ t.value }}</dd>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                {{ t.title }} - USD
+              </dt>
+              <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                {{ t.value }}
+              </dd>
             </div>
             <button
               @click.stop="deleteHandler(t)"
@@ -152,14 +159,20 @@ export default {
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
       <section v-if="selected" class="relative">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">{{ selected.title }} - USD</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
+          {{ selected.title }} - USD
+        </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div class="bg-purple-800 border w-10 h-24"></div>
           <div class="bg-purple-800 border w-10 h-32"></div>
           <div class="bg-purple-800 border w-10 h-48"></div>
           <div class="bg-purple-800 border w-10 h-16"></div>
         </div>
-        <button @click="selected = null" type="button" class="absolute top-0 right-0">
+        <button
+          @click="selected = null"
+          type="button"
+          class="absolute top-0 right-0"
+        >
           <CloseIcon />
         </button>
       </section>
