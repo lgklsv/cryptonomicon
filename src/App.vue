@@ -48,6 +48,21 @@ export default {
     deleteHandler(tickerToRemove) {
       this.tickers = this.tickers.filter((t) => t.id !== tickerToRemove.id);
     },
+
+    selectHandler(ticker) {
+      const prevId = this.selected?.id;
+      this.selected = ticker;
+      if (prevId === ticker.id) return;
+      this.graph = [];
+    },
+
+    normalizeGraph() {
+      const maxValue = Math.max(...this.graph);
+      const minValue = Math.min(...this.graph);
+      return this.graph.map(
+        (val) => 5 + ((val - minValue) * 95) / (maxValue - minValue)
+      );
+    },
   },
 };
 </script>
@@ -85,7 +100,7 @@ export default {
         <div class="flex">
           <div class="max-w-xs">
             <label for="wallet" class="block text-sm font-medium text-gray-700">
-              Тикер {{ ticker }}
+              Тикер
             </label>
             <div class="mt-1 relative rounded-md shadow-md">
               <input
@@ -139,11 +154,11 @@ export default {
           <div
             v-for="t in tickers"
             :key="t.title"
-            @click="selected = t"
+            @click="selectHandler(t)"
             :class="{
               'border-purple-800': selected === t,
             }"
-            class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
+            class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
               <dt class="text-sm font-medium text-gray-500 truncate">
@@ -170,9 +185,10 @@ export default {
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div
-            v-for="(bar, idx) in graph"
+            v-for="(bar, idx) in normalizeGraph()"
             :key="idx"
-            class="bg-purple-800 border w-10 h-24"
+            :style="{ height: `${bar}%` }"
+            class="bg-purple-800 border w-10"
           />
         </div>
         <button
