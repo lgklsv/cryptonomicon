@@ -124,6 +124,9 @@ export default {
             v-for="t in tickers"
             :key="t.title"
             @click="selected = t"
+            :class="{
+              'border-purple-800': selected === t
+            }"
             class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-transparent border-4 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
@@ -131,7 +134,7 @@ export default {
               <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ t.value }}</dd>
             </div>
             <button
-              @click="deleteHandler(t)"
+              @click.stop="deleteHandler(t)"
               class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all"
             >
               <TrashIcon />
@@ -142,7 +145,7 @@ export default {
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
       <section v-if="selected" class="relative">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">VUE - USD</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">{{ selected.title }} - USD</h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div class="bg-purple-800 border w-10 h-24"></div>
           <div class="bg-purple-800 border w-10 h-32"></div>
