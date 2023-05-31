@@ -14,20 +14,25 @@ export default {
 
   data() {
     return {
-      ticker: 'default',
-      tickers: [
-        { id: '1', title: 'WTF', value: 1.11 },
-        { id: '2', title: 'VUE', value: 80000.0 },
-        { id: '3', title: 'BTC', value: 99999.99 },
-        { id: '4', title: 'DOGE', value: 0.0014 }
-      ],
+      ticker: '',
+      tickers: [],
       selected: null
     }
   },
 
   methods: {
     add() {
-      this.tickers.push({ id: uuidv4(), title: this.ticker, value: 1.11 })
+      const newTicker = { id: uuidv4(), title: this.ticker, value: '-' }
+      this.tickers.push(newTicker)
+
+      setInterval(async () => {
+        const result = await fetch(
+          `https://min-api.cryptocompare.com/data/price?fsym=${newTicker.title}&tsyms=USD&api_key=98e5704fc3c441f4e0ff5749a13a275758a8aec21c525b9ab49a8a7c58c64264`
+        )
+        const data = await result.json()
+        const curTicker = this.tickers.find((t) => t.id === newTicker.id)
+        curTicker.value = data.USD
+      }, 3000)
       this.ticker = ''
     },
 
