@@ -69,7 +69,7 @@ export default {
 
 <template>
   <div
-    class="container mx-auto min-h-screen flex flex-col items-center bg-gray-100 p-4"
+    class="container mx-auto flex min-h-screen flex-col items-center bg-gray-100 p-4"
   >
     <!-- <div
       class="fixed w-100 h-100 opacity-80 bg-purple-800 inset-0 z-50 flex items-center justify-center"
@@ -102,14 +102,14 @@ export default {
             <label for="wallet" class="block text-sm font-medium text-gray-700">
               Тикер
             </label>
-            <div class="mt-1 relative rounded-md shadow-md">
+            <div class="relative mt-1 rounded-md shadow-md">
               <input
                 v-model="ticker"
                 @keyup.enter="add"
                 type="text"
                 name="wallet"
                 id="wallet"
-                class="block w-full p-2 pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+                class="block w-full rounded-md border-gray-300 p-2 pr-10 text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
                 placeholder="Например DOGE"
               />
             </div>
@@ -141,7 +141,7 @@ export default {
         <button
           @click="add"
           type="button"
-          class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          class="my-4 inline-flex items-center rounded-full border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium leading-4 text-white shadow-sm transition-colors duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         >
           <PlusIcon />
           Добавить
@@ -149,7 +149,7 @@ export default {
       </section>
 
       <template v-if="tickers.length > 0">
-        <hr class="w-full border-t border-gray-600 my-4" />
+        <hr class="my-4 w-full border-t border-gray-600" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
             v-for="t in tickers"
@@ -158,10 +158,10 @@ export default {
             :class="{
               'border-purple-800': selected === t,
             }"
-            class="flex flex-col justify-between items-center bg-white overflow-hidden shadow rounded-lg border-4 border-solid cursor-pointer"
+            class="flex cursor-pointer flex-col items-center justify-between overflow-hidden rounded-lg border-4 border-solid bg-white shadow"
           >
-            <div class="px-4 py-5 sm:p-6 text-center">
-              <dt class="text-sm font-medium text-gray-500 truncate">
+            <div class="px-4 py-5 text-center sm:p-6">
+              <dt class="truncate text-sm font-medium text-gray-500">
                 {{ t.title }} - USD
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
@@ -170,31 +170,31 @@ export default {
             </div>
             <button
               @click.stop="deleteHandler(t)"
-              class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all"
+              class="text-md flex w-full items-center justify-center bg-gray-100 px-4 py-4 font-medium text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-600 hover:opacity-20 sm:px-6"
             >
               <TrashIcon />
               Удалить
             </button>
           </div>
         </dl>
-        <hr class="w-full border-t border-gray-600 my-4" />
+        <hr class="my-4 w-full border-t border-gray-600" />
       </template>
       <section v-if="selected" class="relative">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
+        <h3 class="my-8 text-lg font-medium leading-6 text-gray-900">
           {{ selected.title }} - USD
         </h3>
-        <div class="flex items-end border-gray-600 border-b border-l h-64">
+        <div class="flex h-64 items-end border-b border-l border-gray-600">
           <div
             v-for="(bar, idx) in normalizeGraph()"
             :key="idx"
             :style="{ height: `${bar}%` }"
-            class="bg-purple-800 border w-10"
+            class="w-10 border bg-purple-800"
           />
         </div>
         <button
           @click="selected = null"
           type="button"
-          class="absolute top-0 right-0"
+          class="absolute right-0 top-0"
         >
           <CloseIcon />
         </button>

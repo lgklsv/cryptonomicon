@@ -11,6 +11,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tailwindcss/forms": "^0.5.3",
     "pinia": "^2.0.36",
     "uuid": "^9.0.0",
     "vue": "^3.3.2",
@@ -28,6 +29,7 @@
     "jsdom": "^22.0.0",
     "postcss": "^8.4.24",
     "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.3.0",
     "tailwindcss": "^3.3.2",
     "vite": "^4.3.5",
     "vitest": "^0.31.0"
