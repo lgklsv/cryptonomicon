@@ -37,7 +37,15 @@ export default {
   },
 
   methods: {
-    add() {
+    add(e) {
+      this.errorMes = '';
+
+      // If autocomplete
+      const target = e.target;
+      if (target.id === 'autocomplete') {
+        this.ticker = target.textContent;
+      }
+
       // Validate
       if (
         this.tickers.find(
@@ -46,7 +54,10 @@ export default {
       ) {
         this.errorMes = 'Такой тикер уже добавлен';
         return;
-      } else if (this.errorMes) return;
+      } else if (!this.autocompleteRes.length) {
+        this.errorMes = 'Такого тикера не существует';
+        return;
+      }
 
       const currentTicker = {
         id: uuidv4(),
@@ -63,11 +74,13 @@ export default {
         const data = await result.json();
 
         const curTicker = this.tickers.find((t) => t.id === currentTicker.id);
-        curTicker.value =
-          data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+        if (data.USD) {
+          curTicker.value =
+            data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
 
-        if (this.selected.id === currentTicker.id) {
-          this.graph.push(data.USD);
+          if (this.selected?.id === currentTicker.id) {
+            this.graph.push(data.USD);
+          }
         }
       }, 3000);
       this.ticker = '';
@@ -94,6 +107,7 @@ export default {
     },
 
     autocomplete(e) {
+      this.errorMes = '';
       const enteredData = e.target.value;
       if (!enteredData) {
         this.autocompleteRes = [];
@@ -101,11 +115,11 @@ export default {
       }
 
       const filteredCoins = this.coinsData.filter((coin) =>
-        coin.startsWith(enteredData.toUpperCase())
+        coin.toUpperCase().startsWith(enteredData.toUpperCase())
       );
 
       const exactMatch = this.coinsData.find(
-        (coin) => coin === enteredData.toUpperCase()
+        (coin) => coin.toUpperCase() === enteredData.toUpperCase()
       );
 
       const searchRes = filteredCoins.slice(0, 4);
@@ -113,11 +127,6 @@ export default {
         searchRes.unshift(exactMatch);
         searchRes.pop();
       }
-
-      // Validate
-      if (!searchRes.length) this.errorMes = 'Такого тикера не существует';
-      else this.errorMes = '';
-
       this.autocompleteRes = searchRes;
     },
   },
@@ -160,6 +169,8 @@ export default {
               <span
                 v-for="suggestion in autocompleteRes"
                 :key="suggestion"
+                @click="add"
+                :id="'autocomplete'"
                 class="m-1 inline-flex cursor-pointer items-center rounded-md bg-gray-300 px-2 text-xs font-medium text-gray-800"
               >
                 {{ suggestion }}
