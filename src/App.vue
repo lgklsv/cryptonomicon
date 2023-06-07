@@ -24,6 +24,7 @@ export default {
       tickers: [],
       selected: null,
       graph: [],
+      errorMes: '',
     };
   },
 
@@ -37,7 +38,22 @@ export default {
 
   methods: {
     add() {
-      const currentTicker = { id: uuidv4(), title: this.ticker, value: '-' };
+      // Validate
+      if (
+        this.tickers.find(
+          (t) => t.title.toUpperCase() === this.ticker.toUpperCase()
+        )
+      ) {
+        this.errorMes = 'Такой тикер уже добавлен';
+        return;
+      } else if (this.errorMes) return;
+
+      const currentTicker = {
+        id: uuidv4(),
+        title: this.ticker.toUpperCase(),
+        value: '-',
+      };
+
       this.tickers.push(currentTicker);
 
       setInterval(async () => {
@@ -55,6 +71,7 @@ export default {
         }
       }, 3000);
       this.ticker = '';
+      this.autocompleteRes = [];
     },
 
     deleteHandler(tickerToRemove) {
@@ -96,6 +113,11 @@ export default {
         searchRes.unshift(exactMatch);
         searchRes.pop();
       }
+
+      // Validate
+      if (!searchRes.length) this.errorMes = 'Такого тикера не существует';
+      else this.errorMes = '';
+
       this.autocompleteRes = searchRes;
     },
   },
@@ -143,7 +165,9 @@ export default {
                 {{ suggestion }}
               </span>
             </div>
-            <!-- <div class="text-sm text-red-600">Такой тикер уже добавлен</div> -->
+            <div v-if="errorMes" class="text-sm text-red-600">
+              {{ errorMes }}
+            </div>
           </div>
         </div>
         <button
