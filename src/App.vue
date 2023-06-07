@@ -19,7 +19,8 @@ export default {
   data() {
     return {
       ticker: '',
-      coinsData: null,
+      coinsData: [],
+      autocompleteRes: [],
       tickers: [],
       selected: null,
       graph: [],
@@ -29,7 +30,9 @@ export default {
   mounted() {
     fetch('https://min-api.cryptocompare.com/data/all/coinlist?summary=true')
       .then((res) => res.json())
-      .then((data) => (this.coinsData = data));
+      .then((coins) => {
+        return (this.coinsData = Object.keys(coins.Data));
+      });
   },
 
   methods: {
@@ -72,6 +75,29 @@ export default {
         (val) => 5 + ((val - minValue) * 95) / (maxValue - minValue)
       );
     },
+
+    autocomplete(e) {
+      const enteredData = e.target.value;
+      if (!enteredData) {
+        this.autocompleteRes = [];
+        return;
+      }
+
+      const filteredCoins = this.coinsData.filter((coin) =>
+        coin.startsWith(enteredData.toUpperCase())
+      );
+
+      const exactMatch = this.coinsData.find(
+        (coin) => coin === enteredData.toUpperCase()
+      );
+
+      const searchRes = filteredCoins.slice(0, 4);
+      if (exactMatch) {
+        searchRes.unshift(exactMatch);
+        searchRes.pop();
+      }
+      this.autocompleteRes = searchRes;
+    },
   },
 };
 </script>
@@ -81,7 +107,7 @@ export default {
     class="container mx-auto flex min-h-screen flex-col items-center bg-gray-100 p-4"
   >
     <div
-      v-if="!coinsData"
+      v-if="!coinsData.length"
       class="w-100 h-100 fixed inset-0 z-50 flex items-center justify-center bg-purple-800 opacity-80"
     >
       <SpinnerIcon />
@@ -97,6 +123,7 @@ export default {
               <input
                 v-model="ticker"
                 @keyup.enter="add"
+                @input="autocomplete"
                 type="text"
                 name="wallet"
                 id="wallet"
@@ -104,28 +131,18 @@ export default {
                 placeholder="Например DOGE"
               />
             </div>
-            <!-- <div class="flex bg-white p-1 rounded-md shadow-md flex-wrap">
+            <div
+              v-if="autocompleteRes.length"
+              class="flex flex-wrap rounded-md bg-white p-1 shadow-md"
+            >
               <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+                v-for="suggestion in autocompleteRes"
+                :key="suggestion"
+                class="m-1 inline-flex cursor-pointer items-center rounded-md bg-gray-300 px-2 text-xs font-medium text-gray-800"
               >
-                BTC
+                {{ suggestion }}
               </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                CHD
-              </span>
-            </div> -->
+            </div>
             <!-- <div class="text-sm text-red-600">Такой тикер уже добавлен</div> -->
           </div>
         </div>
