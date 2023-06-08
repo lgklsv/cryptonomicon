@@ -19,15 +19,18 @@ export default {
   data() {
     return {
       ticker: '',
+      filter: '',
+
       coinsData: [],
       autocompleteRes: [],
+      errorMes: '',
+
       tickers: [],
       selected: null,
+
       graph: [],
-      errorMes: '',
+
       page: 1,
-      filter: '',
-      hasNextPage: false,
     };
   },
 
@@ -56,19 +59,39 @@ export default {
       });
   },
 
-  methods: {
-    filteredTickers() {
-      const start = (this.page - 1) * 6;
-      const end = this.page * 6;
-
-      const filteredTickers = this.tickers.filter((ticker) =>
-        ticker.title.toUpperCase().includes(this.filter.toUpperCase())
-      );
-      this.hasNextPage = filteredTickers.length > end;
-
-      return filteredTickers.slice(start, end);
+  computed: {
+    startIndex() {
+      return (this.page - 1) * 6;
     },
 
+    endIndex() {
+      return this.page * 6;
+    },
+
+    filteredTickers() {
+      return this.tickers.filter((ticker) =>
+        ticker.title.toUpperCase().includes(this.filter.toUpperCase())
+      );
+    },
+
+    paginatedTickers() {
+      return this.filteredTickers.slice(this.startIndex, this.endIndex);
+    },
+
+    hasNextPage() {
+      return this.filteredTickers.length > this.endIndex;
+    },
+
+    normalizedGraph() {
+      const maxValue = Math.max(...this.graph);
+      const minValue = Math.min(...this.graph);
+      return this.graph.map(
+        (val) => 5 + ((val - minValue) * 95) / (maxValue - minValue)
+      );
+    },
+  },
+
+  methods: {
     subscribeToUpdates(ticker) {
       setInterval(async () => {
         const result = await fetch(
@@ -138,14 +161,6 @@ export default {
       this.graph = [];
     },
 
-    normalizeGraph() {
-      const maxValue = Math.max(...this.graph);
-      const minValue = Math.min(...this.graph);
-      return this.graph.map(
-        (val) => 5 + ((val - minValue) * 95) / (maxValue - minValue)
-      );
-    },
-
     autocomplete(e) {
       this.errorMes = '';
       const enteredData = e.target.value;
@@ -172,7 +187,6 @@ export default {
   },
   watch: {
     filter() {
-      this.page = 1;
       history.pushState(
         null,
         document.title,
@@ -265,12 +279,12 @@ export default {
           >
             Вперед
           </button>
-          Фильтр: <input v-model="filter" />
+          Фильтр: <input v-model="filter" @input="page = 1" />
         </div>
         <hr class="my-4 w-full border-t border-gray-600" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
-            v-for="t in filteredTickers()"
+            v-for="t in paginatedTickers"
             :key="t.title"
             @click="selectHandler(t)"
             :class="{
@@ -303,7 +317,7 @@ export default {
         </h3>
         <div class="flex h-64 items-end border-b border-l border-gray-600">
           <div
-            v-for="(bar, idx) in normalizeGraph()"
+            v-for="(bar, idx) in normalizedGraph"
             :key="idx"
             :style="{ height: `${bar}%` }"
             class="w-10 border bg-purple-800"
