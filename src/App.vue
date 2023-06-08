@@ -25,6 +25,8 @@ export default {
       selected: null,
       graph: [],
       errorMes: '',
+      page: 1,
+      filter: '',
     };
   },
 
@@ -47,6 +49,12 @@ export default {
   },
 
   methods: {
+    filteredTickers() {
+      return this.tickers.filter((ticker) =>
+        ticker.title.toUpperCase().includes(this.filter.toUpperCase())
+      );
+    },
+
     subscribeToUpdates(ticker) {
       setInterval(async () => {
         const result = await fetch(
@@ -210,9 +218,23 @@ export default {
 
       <template v-if="tickers.length > 0">
         <hr class="my-4 w-full border-t border-gray-600" />
+        <div>
+          <button
+            class="mx-2 my-4 inline-flex items-center rounded-full border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium leading-4 text-white shadow-sm transition-colors duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Назад
+          </button>
+          <button
+            class="mx-2 my-4 inline-flex items-center rounded-full border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium leading-4 text-white shadow-sm transition-colors duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Вперед
+          </button>
+          Фильтр: <input v-model="filter" />
+        </div>
+        <hr class="my-4 w-full border-t border-gray-600" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div
-            v-for="t in tickers"
+            v-for="t in filteredTickers()"
             :key="t.title"
             @click="selectHandler(t)"
             :class="{
