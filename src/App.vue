@@ -32,6 +32,13 @@ export default {
   },
 
   created() {
+    const urlFiltersData = Object.fromEntries(
+      new URL(location).searchParams.entries()
+    );
+    if (urlFiltersData.filter) this.filter = urlFiltersData.filter;
+
+    if (urlFiltersData.page) this.page = urlFiltersData.page;
+
     const tickersData = localStorage.getItem('cryptonomicon-list');
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
@@ -166,6 +173,18 @@ export default {
   watch: {
     filter() {
       this.page = 1;
+      history.pushState(
+        null,
+        document.title,
+        `${location.pathname}?filter=${this.filter}&page=${this.page}`
+      );
+    },
+    page() {
+      history.pushState(
+        null,
+        document.title,
+        `${location.pathname}?filter=${this.filter}&page=${this.page}`
+      );
     },
   },
 };
