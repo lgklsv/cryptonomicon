@@ -27,6 +27,7 @@ export default {
       errorMes: '',
       page: 1,
       filter: '',
+      hasNextPage: false,
     };
   },
 
@@ -50,9 +51,15 @@ export default {
 
   methods: {
     filteredTickers() {
-      return this.tickers.filter((ticker) =>
+      const start = (this.page - 1) * 6;
+      const end = this.page * 6;
+
+      const filteredTickers = this.tickers.filter((ticker) =>
         ticker.title.toUpperCase().includes(this.filter.toUpperCase())
       );
+      this.hasNextPage = filteredTickers.length > end;
+
+      return filteredTickers.slice(start, end);
     },
 
     subscribeToUpdates(ticker) {
@@ -103,6 +110,7 @@ export default {
       };
 
       this.tickers.push(currentTicker);
+      this.filter = '';
 
       localStorage.setItem('cryptonomicon-list', JSON.stringify(this.tickers));
 
@@ -153,6 +161,11 @@ export default {
         searchRes.pop();
       }
       this.autocompleteRes = searchRes;
+    },
+  },
+  watch: {
+    filter() {
+      this.page = 1;
     },
   },
 };
@@ -221,11 +234,15 @@ export default {
         <div>
           <button
             class="mx-2 my-4 inline-flex items-center rounded-full border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium leading-4 text-white shadow-sm transition-colors duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            v-if="page > 1"
+            @click="page = page - 1"
           >
             Назад
           </button>
           <button
             class="mx-2 my-4 inline-flex items-center rounded-full border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium leading-4 text-white shadow-sm transition-colors duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            v-if="hasNextPage"
+            @click="page = page + 1"
           >
             Вперед
           </button>
