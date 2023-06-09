@@ -4,7 +4,7 @@ import PlusIcon from './assets/icons/PlusIcon.vue';
 import TrashIcon from './assets/icons/TrashIcon.vue';
 import CloseIcon from './assets/icons/CloseIcon.vue';
 import SpinnerIcon from './assets/icons/SpinnerIcon.vue';
-const API = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY;
+import { loadTicker } from './api';
 
 export default {
   name: 'App',
@@ -48,12 +48,12 @@ export default {
     });
 
     const tickersData = localStorage.getItem('cryptonomicon-list');
+
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
-      this.tickers.forEach((ticker) => {
-        this.subscribeToUpdates(ticker);
-      });
     }
+
+    setInterval(this.updateTickers, 5000);
   },
 
   mounted() {
@@ -109,23 +109,26 @@ export default {
   },
 
   methods: {
-    subscribeToUpdates(ticker) {
-      setInterval(async () => {
-        const result = await fetch(
-          `https://min-api.cryptocompare.com/data/price?fsym=${ticker.title}&tsyms=USD&api_key=${API}`
-        );
-        const data = await result.json();
+    formatPrice(price) {
+      if (price) return price > 1 ? price.toFixed(2) : price.toPrecision(2);
+      else return '-';
+    },
 
-        const curTicker = this.tickers.find((t) => t.id === ticker.id);
-        if (data.USD) {
-          curTicker.value =
-            data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
+    async updateTickers() {
+      if (!this.tickers.length) return;
 
-          if (this.selectedTicker?.id === ticker.id) {
-            this.graph.push(data.USD);
-          }
+      const exchangeData = await loadTicker(this.tickers.map((t) => t.title));
+
+      this.tickers.forEach((ticker) => {
+        const price = exchangeData[ticker.title.toUpperCase()];
+        if (!price) {
+          ticker.price = '-';
+          return;
         }
-      }, 3000);
+
+        const normalizedPrice = 1 / price;
+        ticker.price = normalizedPrice;
+      });
     },
 
     add(e) {
@@ -153,14 +156,11 @@ export default {
       const currentTicker = {
         id: uuidv4(),
         title: this.ticker.toUpperCase(),
-        value: '-',
+        price: '-',
       };
 
       this.tickers = [...this.tickers, currentTicker];
       this.filter = '';
-
-      this.subscribeToUpdates(currentTicker);
-
       this.ticker = '';
       this.autocompleteRes = [];
     },
@@ -320,7 +320,7 @@ export default {
                 {{ t.title }} - USD
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                {{ t.value }}
+                {{ formatPrice(t.price) }}
               </dd>
             </div>
             <button
