@@ -4,7 +4,7 @@ import PlusIcon from './assets/icons/PlusIcon.vue';
 import TrashIcon from './assets/icons/TrashIcon.vue';
 import CloseIcon from './assets/icons/CloseIcon.vue';
 import SpinnerIcon from './assets/icons/SpinnerIcon.vue';
-import { loadTickers } from './api';
+import { subscribeToTicker } from './api';
 
 export default {
   name: 'App',
@@ -51,6 +51,11 @@ export default {
 
     if (tickersData) {
       this.tickers = JSON.parse(tickersData);
+      this.tickers.forEach((ticker) => {
+        subscribeToTicker(ticker.title, (newPrice) =>
+          this.updateTicker(ticker.title, newPrice)
+        );
+      });
     }
 
     setInterval(this.updateTickers, 5000);
@@ -114,22 +119,18 @@ export default {
       return price > 1 ? price.toFixed(2) : price.toPrecision(2);
     },
 
-    async updateTickers() {
-      if (!this.tickers.length) return;
-
-      const exchangeData = await loadTickers(this.tickers.map((t) => t.title));
-
-      this.tickers.forEach((ticker) => {
-        const price = exchangeData[ticker.title.toUpperCase()];
-        ticker.price = price ?? '-';
-
-        if (
-          this.selectedTicker?.id === ticker.id &&
-          typeof price === 'number'
-        ) {
-          this.graph.push(price);
-        }
-      });
+    updateTicker(tickerName, price) {
+      this.tickers
+        .filter((t) => t.title === tickerName)
+        .forEach((t) => {
+          t.price = price;
+          if (
+            this.selectedTicker?.id === t.id &&
+            typeof price === 'number'
+          ) {
+            this.graph.push(price);
+          }
+        });
     },
 
     add(e) {
@@ -162,6 +163,9 @@ export default {
 
       this.tickers = [...this.tickers, currentTicker];
       this.filter = '';
+      subscribeToTicker(currentTicker.title, (newPrice) =>
+        this.updateTicker(currentTicker.title, newPrice)
+      );
       this.ticker = '';
       this.autocompleteRes = [];
     },
