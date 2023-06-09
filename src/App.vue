@@ -38,9 +38,14 @@ export default {
     const urlFiltersData = Object.fromEntries(
       new URL(location).searchParams.entries()
     );
-    if (urlFiltersData.filter) this.filter = urlFiltersData.filter;
 
-    if (urlFiltersData.page) this.page = urlFiltersData.page;
+    const VALID_KEYS = ['filter', 'page'];
+
+    VALID_KEYS.forEach((key) => {
+      if (urlFiltersData[key]) {
+        this[key] = urlFiltersData[key];
+      }
+    });
 
     const tickersData = localStorage.getItem('cryptonomicon-list');
     if (tickersData) {
