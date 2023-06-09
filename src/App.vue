@@ -26,7 +26,7 @@ export default {
       errorMes: '',
 
       tickers: [],
-      selected: null,
+      selectedTicker: null,
 
       graph: [],
 
@@ -109,7 +109,7 @@ export default {
           curTicker.value =
             data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
 
-          if (this.selected?.id === ticker.id) {
+          if (this.selectedTicker?.id === ticker.id) {
             this.graph.push(data.USD);
           }
         }
@@ -157,13 +157,13 @@ export default {
 
     deleteHandler(tickerToRemove) {
       this.tickers = this.tickers.filter((t) => t.id !== tickerToRemove.id);
+      if (this.selectedTicker === tickerToRemove) {
+        this.selectedTicker = null;
+      }
     },
 
     selectHandler(ticker) {
-      const prevId = this.selected?.id;
-      this.selected = ticker;
-      if (prevId === ticker.id) return;
-      this.graph = [];
+      this.selectedTicker = ticker;
     },
 
     autocomplete(e) {
@@ -190,7 +190,18 @@ export default {
       this.autocompleteRes = searchRes;
     },
   },
+
   watch: {
+    selectedTicker() {
+      this.graph = [];
+    },
+
+    paginatedTickers() {
+      if (this.paginatedTickers.length === 0 && this.page > 1) {
+        this.page -= 1;
+      }
+    },
+
     filter() {
       history.pushState(
         null,
@@ -198,6 +209,7 @@ export default {
         `${location.pathname}?filter=${this.filter}&page=${this.page}`
       );
     },
+
     page() {
       history.pushState(
         null,
@@ -293,7 +305,7 @@ export default {
             :key="t.title"
             @click="selectHandler(t)"
             :class="{
-              'border-purple-800': selected === t,
+              'border-purple-800': selectedTicker === t,
             }"
             class="flex cursor-pointer flex-col items-center justify-between overflow-hidden rounded-lg border-4 border-solid bg-white shadow"
           >
@@ -316,9 +328,9 @@ export default {
         </dl>
         <hr class="my-4 w-full border-t border-gray-600" />
       </template>
-      <section v-if="selected" class="relative">
+      <section v-if="selectedTicker" class="relative">
         <h3 class="my-8 text-lg font-medium leading-6 text-gray-900">
-          {{ selected.title }} - USD
+          {{ selectedTicker.title }} - USD
         </h3>
         <div class="flex h-64 items-end border-b border-l border-gray-600">
           <div
@@ -329,7 +341,7 @@ export default {
           />
         </div>
         <button
-          @click="selected = null"
+          @click="selectedTicker = null"
           type="button"
           class="absolute right-0 top-0"
         >
