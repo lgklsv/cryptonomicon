@@ -4,7 +4,7 @@ import PlusIcon from './assets/icons/PlusIcon.vue';
 import TrashIcon from './assets/icons/TrashIcon.vue';
 import CloseIcon from './assets/icons/CloseIcon.vue';
 import SpinnerIcon from './assets/icons/SpinnerIcon.vue';
-import { loadTicker } from './api';
+import { loadTickers } from './api';
 
 export default {
   name: 'App',
@@ -110,24 +110,25 @@ export default {
 
   methods: {
     formatPrice(price) {
-      if (price) return price > 1 ? price.toFixed(2) : price.toPrecision(2);
-      else return '-';
+      if (price === '-') return price;
+      return price > 1 ? price.toFixed(2) : price.toPrecision(2);
     },
 
     async updateTickers() {
       if (!this.tickers.length) return;
 
-      const exchangeData = await loadTicker(this.tickers.map((t) => t.title));
+      const exchangeData = await loadTickers(this.tickers.map((t) => t.title));
 
       this.tickers.forEach((ticker) => {
         const price = exchangeData[ticker.title.toUpperCase()];
-        if (!price) {
-          ticker.price = '-';
-          return;
-        }
+        ticker.price = price ?? '-';
 
-        const normalizedPrice = 1 / price;
-        ticker.price = normalizedPrice;
+        if (
+          this.selectedTicker?.id === ticker.id &&
+          typeof price === 'number'
+        ) {
+          this.graph.push(price);
+        }
       });
     },
 
