@@ -94,6 +94,13 @@ export default {
         (val) => 5 + ((val - minValue) * 95) / (maxValue - minValue)
       );
     },
+
+    pageStateOptions() {
+      return {
+        filter: this.filter,
+        page: this.page,
+      };
+    },
   },
 
   methods: {
@@ -144,10 +151,8 @@ export default {
         value: '-',
       };
 
-      this.tickers.push(currentTicker);
+      this.tickers = [...this.tickers, currentTicker];
       this.filter = '';
-
-      localStorage.setItem('cryptonomicon-list', JSON.stringify(this.tickers));
 
       this.subscribeToUpdates(currentTicker);
 
@@ -192,6 +197,10 @@ export default {
   },
 
   watch: {
+    tickers() {
+      localStorage.setItem('cryptonomicon-list', JSON.stringify(this.tickers));
+    },
+
     selectedTicker() {
       this.graph = [];
     },
@@ -202,19 +211,11 @@ export default {
       }
     },
 
-    filter() {
+    pageStateOptions(value) {
       history.pushState(
         null,
         document.title,
-        `${location.pathname}?filter=${this.filter}&page=${this.page}`
-      );
-    },
-
-    page() {
-      history.pushState(
-        null,
-        document.title,
-        `${location.pathname}?filter=${this.filter}&page=${this.page}`
+        `${location.pathname}?filter=${value.filter}&page=${value.page}`
       );
     },
   },
