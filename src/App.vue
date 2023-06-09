@@ -4,7 +4,7 @@ import PlusIcon from './assets/icons/PlusIcon.vue';
 import TrashIcon from './assets/icons/TrashIcon.vue';
 import CloseIcon from './assets/icons/CloseIcon.vue';
 import SpinnerIcon from './assets/icons/SpinnerIcon.vue';
-import { subscribeToTicker } from './api';
+import { subscribeToTicker, unsubscribeFromTicker } from './api';
 
 export default {
   name: 'App',
@@ -124,10 +124,7 @@ export default {
         .filter((t) => t.title === tickerName)
         .forEach((t) => {
           t.price = price;
-          if (
-            this.selectedTicker?.id === t.id &&
-            typeof price === 'number'
-          ) {
+          if (this.selectedTicker?.id === t.id && typeof price === 'number') {
             this.graph.push(price);
           }
         });
@@ -175,6 +172,7 @@ export default {
       if (this.selectedTicker === tickerToRemove) {
         this.selectedTicker = null;
       }
+      unsubscribeFromTicker(tickerToRemove.title);
     },
 
     selectHandler(ticker) {
