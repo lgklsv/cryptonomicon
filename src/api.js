@@ -1,39 +1,63 @@
 const API_KEY = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY;
 
 const tickersHandlers = new Map();
+const socket = new WebSocket(
+  `wss://streamer.cryptocompare.com/v2?api_key=${API_KEY}`
+);
 
-// TODO: URL construction is better with URL search params
-const loadTickers = async () => {
-  if (tickersHandlers.size === 0) return;
+const AGGREGATE_INDEX = '5';
 
-  const result = await fetch(
-    `https://min-api.cryptocompare.com/data/pricemulti?fsyms=${Array.from(
-      tickersHandlers.keys()
-    ).join(',')}&tsyms=USD&api_key=${API_KEY}`
+socket.addEventListener('message', (e) => {
+  const {
+    TYPE: type,
+    FROMSYMBOL: currency,
+    PRICE: newPrice,
+  } = JSON.parse(e.data);
+
+  if (type !== AGGREGATE_INDEX || !newPrice) {
+    return;
+  }
+  const handlers = tickersHandlers.get(currency) ?? [];
+  handlers.forEach((fn) => fn(newPrice));
+});
+
+function sendToWebSocket(message) {
+  const stringifiedMessage = JSON.stringify(message);
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(stringifiedMessage);
+    return;
+  }
+
+  socket.addEventListener(
+    'open',
+    () => {
+      socket.send(stringifiedMessage);
+    },
+    { once: true }
   );
-  const rawData = await result.json();
-  const formattedData = Object.fromEntries(
-    Object.entries(rawData).map(([key, value]) => [key, value.USD])
-  );
+}
 
-  Object.entries(formattedData).forEach(([currency, newPrice]) => {
-    const handlers = tickersHandlers.get(currency) ?? [];
-    handlers.forEach((fn) => fn(newPrice));
+function subscribeToTickerOnWs(ticker) {
+  sendToWebSocket({
+    action: 'SubAdd',
+    subs: [`5~CCCAGG~${ticker}~USD`],
   });
-  return formattedData;
-};
+}
+
+function unsubscribeFromTickerOnWs(ticker) {
+  sendToWebSocket({
+    action: 'SubRemove',
+    subs: [`5~CCCAGG~${ticker}~USD`],
+  });
+}
 
 export const subscribeToTicker = (ticker, cb) => {
   const subscribers = tickersHandlers.get(ticker) || [];
   tickersHandlers.set(ticker, [...subscribers, cb]);
+  subscribeToTickerOnWs(ticker);
 };
 
 export const unsubscribeFromTicker = (ticker) => {
   tickersHandlers.delete(ticker);
+  unsubscribeFromTickerOnWs(ticker);
 };
-
-setInterval(() => {
-  loadTickers();
-}, 3000);
-
-window.tickersHandlers = tickersHandlers;
